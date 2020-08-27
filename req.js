@@ -7,6 +7,8 @@ function makeRequest(callback) {
       callback(err, null);
     }
 
+    console.log('Check!')
+
     callback(null, res.body.items);
   })
 }

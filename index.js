@@ -5,20 +5,26 @@ const makeRequest = require("./req")
 const bot = new Bot(token, { polling: true });
 
 const chatId = 110977135;
+const keyboard = [["/start", "/stop"], ["/total", "/by_day"]]
+const options = { "reply_markup": { "keyboard": keyboard }};
 
 let interval;
 
+function sendWithDefaultOptions(chatId, message) {
+  bot.sendMessage(chatId, message, options);
+}
+
 bot.onText(/\/start/, () => {
-  bot.sendMessage(chatId,'started');
+  sendWithDefaultOptions(chatId,'started');
 
   interval = setInterval(() => {
     makeRequest(function(err, data) {
         if (err) {
-            bot.sendMessage(chatId, err.message);
+            sendWithDefaultOptions(chatId, err.message);
         }
 
         if (data[0].count_tickets_lpu > 0) {
-            bot.sendMessage(chatId, data[0].count_tickets_lpu)
+            sendWithDefaultOptions(chatId, data[0].count_tickets_lpu)
         }
     });
   }, 1000 * 60 * 10) 
@@ -27,26 +33,26 @@ bot.onText(/\/start/, () => {
 bot.onText(/\/stop/, () => {
   clearInterval(interval);
 
-  bot.sendMessage(chatId, "stopped");
+  sendWithDefaultOptions(chatId, "stopped");
 })
 
 bot.onText(/\/total/, (msg) => {
   makeRequest(function(err, data) {
     if (err) {
-      bot.sendMessage(chatId, err.message);
+      sendWithDefaultOptions(chatId, err.message);
     }
 
-    bot.sendMessage(chatId, data[0].count_tickets_lpu)
+    sendWithDefaultOptions(chatId, data[0].count_tickets_lpu)
   });
 });
 
 bot.onText(/\/by_day/, (msg) => {
   makeRequest(function(err, data) {
     if (err) {
-      bot.sendMessage(chatId, err.message);
+      sendWithDefaultOptions(chatId, err.message);
     }
 
-    bot.sendMessage(chatId, getTicketsByDay(data[0]))
+    sendWithDefaultOptions(chatId, getTicketsByDay(data[0]))
   });
 });
 
